@@ -1,0 +1,1123 @@
+---
+title: "Supplementary material"
+brand: false
+---
+
+```{r}
+#| include: false
+
+library(knitr)
+library(tidyverse)
+library(brms)
+library(tidybayes)
+library(cmdstanr)
+library(glue)
+library(forcats)
+library(stringr)
+library(ggridges)
+library(posterior)
+library(tidytext)
+library(gt)
+library(ggnewscale)
+library(stringr)
+library(latex2exp)
+library(ggforce)
+library(readxl)
+library(patchwork)
+library(gganimate)
+library(distributional)
+library(reshape2)
+library(scales)
+
+
+
+sigfig <- function(vec, n=3){ 
+  ### function to round values to N significant digits
+  # input:   vec       vector of numeric
+  #          n         integer is the required sigfig  
+  # output:  outvec    vector of numeric rounded to N sigfig
+  
+  formatC(signif(vec,digits=n), digits=n,format="fg", flag="#") 
+}
+
+theme_set(theme_ggdist())
+theme_update(text = element_text(size = 24),
+             plot.subtitle=element_text(hjust=0.5))
+
+# path <- cmdstanr::cmdstan_path()
+# set_cmdstan_path(path = "C:/Users/Lynx/.cmdstan/cmdstan-2.36.0")
+set_cmdstan_path(path = Sys.getenv("CMDSTAN_PATH"))
+
+knitr::knit_engines$set(
+  stan = function(options) {
+    code <- knitr:::one_string(options$code)
+    out <- options$output.var
+    if (!is.character(out) || length(out) != 1L) stop(
+      "the chunk option output.var must be a character string ",
+      "providing a name for the returned `CmdStanModel` object."
+    )
+    if (options$eval) {
+      if (options$cache) {
+        cache_path <- knitr:::valid_path(
+          options[["cache.path"]],
+          options$label
+        )
+        if (!dir.exists(cache_path)) {
+          dir.create(cache_path)
+        }
+        model_file <- tempfile(
+          fileext = ".stan",
+          tmpdir = cache_path
+        )
+        cat(code, "\n", file = model_file)
+      } else {
+        model_file <- write_stan_file(code)
+      }
+      csm <- cmdstan_model(model_file)
+      assign(out, csm, envir = knit_global())
+    }
+    engine_output(options, code, '')
+  }
+)
+
+
+
+```
+
+```{r}
+#| include: false
+
+df0 <- read_xlsx("D://workR/Blog/Projects/AZV_HCC/SCZ/SCZ_paired_scores2.xlsx")
+
+df <- df0  %>% 
+  janitor::clean_names() %>% 
+  mutate(across(c(panss:cgi_2, pss), as.numeric),
+         visit = factor(visit, levels = c("V1", "V2", "FU"))) %>% 
+  separate_wider_delim(ctq, names = paste0("ctq_", 1:6), delim = ",", too_few = "align_start") %>% 
+  mutate(across(ctq_1:ctq_6, as.numeric))
+
+hcc0 <- read_csv("D://workR/Blog/Projects/AZV_HCC/SCZ/SCZ_HCC_MP.csv")
+
+hcc <- hcc0 %>% 
+  select(-c(group, MP)) %>% 
+  mutate(visit = toupper(visit))
+
+visit_levels <- c("V1", "V2", "FU")
+
+df_hcc <- df %>% 
+  full_join(hcc, by = c("kod", "visit"), relationship = "many-to-many") %>% 
+  mutate(visit = factor(visit, levels = c("V1", "V2", "FU"))) %>%
+  mutate(date_total = if_else(is.na(segment) & visit == "V1", -7, date_total)) %>% 
+  mutate(date_total = if_else(is.na(segment) & visit == "V2", -6, date_total)) %>% 
+  mutate(date_total = if_else(is.na(segment) & visit == "FU", -1, date_total)) %>% 
+  mutate(date_total = if_else(kod == "H-YP8YL", date_total + 0, date_total)) %>% 
+  group_by(kod) %>%
+  mutate(
+    visit_spec = paste(
+      visit_levels[
+        visit_levels %in% visit[!is.na(segment)]
+      ],
+      collapse = ", "
+    )
+  ) %>% 
+  mutate(date_total = case_when(visit_spec == "V1" ~ if_else(!is.na(segment), date_total - 7, -1 - 7),
+                                visit_spec == "V1, V2" ~ if_else(!is.na(segment), date_total - 6, -1 - 6),
+                                visit_spec == "V2" ~ if_else(!is.na(segment), date_total - 6, -1 - 6),
+                                # visit_spec == "V1, FU" ~ if_else(!is.na(segment), date_total - 7, -1 - 7),
+                                # visit_spec == "V2, FU" ~ if_else(!is.na(date_total), date_total - 6, -1 - 6),
+                                # visit_spec == "FU" ~ if_else(!is.na(date_total), date_total - 1, -1 - 1),
+                                .default = date_total)) %>% 
+  group_by(visit) %>% 
+  mutate(visit_mark = quantile(date_total, 0.94, na.rm = TRUE)) %>%
+  ungroup() %>% 
+  mutate(z_panss = scale(panss)[, 1],
+         log_hcc = log(HCC),
+         z_log_hcc = scale(log_hcc)[, 1],
+         z_pss = scale(pss)[, 1]) %>% 
+  group_by(kod, visit) %>% 
+  mutate(z_panss = if_else(row_number() == 1, z_panss, NA_real_),
+         z_pss = if_else(row_number() == 1, z_pss, NA_real_)) %>%
+  identity()
+  
+
+```
+
+
+#### Causal structure
+
+
+```{mermaid}
+%%| fig-width: 6.5
+%%| fig-align: center
+
+flowchart LR
+
+    SCZ[SCZ]
+
+    Z((Latent Process))
+    CTQ[CTQ]
+
+    HCC[HCC]
+    PANSS[PANSS]
+    PSS[PSS]
+
+    SCZ --> |"<span style='font-size:30px; color:#ff0055;'>t<sub>0</sub></span>"| Z
+    CTQ --> |"<span style='font-size:30px; color:#ff0055;'>λ</span>"| Z
+
+    Z --> HCC
+    Z --> PANSS
+    Z --> PSS
+    
+    style SCZ fill:#f55,stroke:#333,stroke-width:2px
+    style CTQ fill:#f55,stroke:#333,stroke-width:2px
+    style Z fill:#bbf,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
+    style HCC fill:#9f9,stroke:#333,stroke-width:2px
+    style PANSS fill:#9f9,stroke:#333,stroke-width:2px
+    style PSS fill:#9f9,stroke:#333,stroke-width:2px
+
+```
+
+
+
+#### Model Formulation
+
+##### 1. Latent Childhood Trauma Facets
+For each subject $i$, the joint distribution of their underlying exposure to abuse ($c_{i,1}$) and neglect ($c_{i,2}$) is drawn from a centered multivariate normal distribution capturing population variance and structural trait correlation:
+
+$$
+\begin{align*}
+\begin{bmatrix} c_{i,1} \\ c_{i,2} \end{bmatrix} &\sim \text{Multivariate-Normal} \left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \; \boldsymbol{\Sigma}_c \right) \\
+\boldsymbol{\Sigma}_c &= \text{diag}(\boldsymbol{\sigma}_c) \, \boldsymbol{\Omega}_c \, \text{diag}(\boldsymbol{\sigma}_c)
+\end{align*}
+$$
+
+Where $\boldsymbol{\sigma}_c = [\sigma_{\text{abuse}}, \sigma_{\text{neglect}}]^T$ maps the population scales, and $\boldsymbol{\Omega}_c$ represents the trait correlation matrix.
+
+##### 2. CTQ Measurement (Emission) Layer
+The individual's true latent trauma states directly manifest across the five observed subscales of the Childhood Trauma Questionnaire. The Abuse factor ($c_{i,1}$) drives emotional, physical, and sexual dimensions, while the Neglect factor ($c_{i,2}$) drives emotional and physical neglect indicators:
+
+$$
+\begin{align*}
+y_{m}^{(\mathrm{EA})} &\sim \text{Normal}\left(\alpha_{\mathrm{EA}} + c_{\text{subj}[m], 1}, \; \sigma_{\mathrm{EA}}\right) \quad \text{[Emotional Abuse]} \\
+y_{m}^{(\mathrm{PA})} &\sim \text{Normal}\left(\alpha_{\mathrm{PA}} + c_{\text{subj}[m], 1}, \; \sigma_{\mathrm{PA}}\right) \quad \text{[Physical Abuse]} \\
+y_{m}^{(\mathrm{SA})} &\sim \text{Normal}\left(\alpha_{\mathrm{SA}} + c_{\text{subj}[m], 1}, \; \sigma_{\mathrm{SA}}\right) \quad \text{[Sexual Abuse]} \\
+y_{m}^{(\mathrm{EN})} &\sim \text{Normal}\left(\alpha_{\mathrm{EN}} + c_{\text{subj}[m], 2}, \; \sigma_{\mathrm{EN}}\right) \quad \text{[Emotional Neglect]} \\
+y_{m}^{(\mathrm{PN})} &\sim \text{Normal}\left(\alpha_{\mathrm{PN}} + c_{\text{subj}[m], 2}, \; \sigma_{\mathrm{PN}}\right) \quad \text{[Physical Neglect]}
+\end{align*}
+$$
+
+##### 3. Latent Dynamics & Personalized Reversion
+The latent dysregulation state $z_i(t)$ transitions over irregular time intervals ($\Delta t = t - t'$) according to a continuous-time [(Ornstein–Uhlenbeck)](https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process) engine. The individual recovery speed $\lambda_i$ forces a strict positive bound via the structural baseline floor $\lambda_0$:
+
+
+$$
+\begin{align*}
+z_i(t) \mid z_i(t') &\sim \text{Normal} \left(e^{-\lambda_i \Delta t} \, z_i(t'),\; \sigma_z \sqrt{1-e^{-2\lambda_i \Delta t}} \right) \\
+\lambda_i &= \lambda_0 + \exp\left(\gamma_{\text{abuse}} \, c_{i,1} + \gamma_{\text{neglect}} \, c_{i,2}\right)
+\end{align*}
+$$
+
+##### 4. Longitudinal Process States and Clinical Measurements
+The state trajectory begins at a unique initial tracking baseline anchored to a matched-pair intercept ($u_{\text{pair}}$) and shifted by diagnostic status (SCZ):
+
+$$
+\begin{align*}
+z_i(t_0) &\sim \text{Normal}\left(u_{\text{pair}[i]} + \beta_{\mathrm{SCZ}} \, \mathrm{SCZ}_i, \; 1\right) \\
+u_j &\sim \text{Normal}(0, \sigma_{\mathrm{pair}})
+\end{align*}
+$$
+
+The evolving state $z_i(t)$ projects concurrent signals down into both historical biological archives and acute clinical cross-sections:
+
+$$
+\begin{align*}
+y_m^{(\mathrm{HCC})} &\sim \text{Student-t}\left(\nu = 6, \; a_{\mathrm{HCC}} + b_{\mathrm{HCC}}\, z_{\text{state}[m]}, \; \sigma_{\mathrm{HCC}}\right) \\
+y_m^{(\mathrm{PANSS})} &\sim \text{Normal}\left(a_{\mathrm{PANSS}} + b_{\mathrm{PANSS}} \, z_{\text{state}[m]}, \; \sigma_{\mathrm{PANSS}}\right) \\
+y_m^{(\mathrm{PSS})} &\sim \text{Normal}\left(a_{\mathrm{PSS}} + b_{\mathrm{PSS}} \, z_{\text{state}[m]}, \; \sigma_{\mathrm{PSS}}\right)
+\end{align*}
+$$
+
+##### 5. Prior Distributions
+
+$$
+\begin{align*}
+\lambda_0, \, \gamma_{\text{abuse}}, \, \gamma_{\text{neglect}}, \, \beta_{\mathrm{SCZ}} &\sim \text{Normal}(0, 1) \\
+\alpha_{\mathrm{EA}}, \, \alpha_{\mathrm{PA}}, \, \alpha_{\mathrm{SA}}, \, \alpha_{\mathrm{EN}}, \, \alpha_{\mathrm{PN}} &\sim \text{Normal}(0, 1) \\
+a_{\mathrm{PANSS}}, \, a_{\mathrm{PSS}}, \, a_{\mathrm{HCC}} &\sim \text{Normal}(0, 0.5) \\
+b_{\mathrm{PANSS}}, \, b_{\mathrm{PSS}}, \, b_{\mathrm{HCC}} &\sim \text{Normal}(0, 1) \\
+\sigma_z, \, \sigma_{\mathrm{pair}}, \, \sigma_{\mathrm{HCC}}, \, \sigma_{\mathrm{PANSS}}, \, \sigma_{\mathrm{PSS}} &\sim \text{Exponential}(1) \\
+\sigma_{\mathrm{EA}}, \, \sigma_{\mathrm{PA}}, \, \sigma_{\mathrm{SA}}, \, \sigma_{\mathrm{EN}}, \, \sigma_{\mathrm{PN}} &\sim \text{Exponential}(1) \\
+\boldsymbol{\sigma}_c &\sim \text{Exponential}(1) \\
+\boldsymbol{\Omega}_c &\sim \text{LKJ}(\eta = 2)
+\end{align*}
+$$
+
+#### Stan code
+
+The mathematical model is rewritten in the Stan language.
+
+```{stan scz, output.var="scz_model", cache=FALSE}
+#| code-fold: false
+#| echo: true
+
+data{
+
+int <lower=1> N_state;
+array[N_state] int <lower=1> subj_id;
+int <lower=1> N_pair;
+array[N_state] int <lower=1> pair_id;
+vector[N_state] time;
+array[N_state] int <lower=0, upper=1> is_first;
+array[N_state] int <lower=0, upper=1> scz;
+
+int <lower=1> N_hcc;
+array[N_hcc] int <lower=1> state_hcc;
+vector[N_hcc] y_hcc;
+
+int <lower=1> N_panss;
+array[N_panss] int <lower=1> state_panss;
+vector[N_panss] y_panss;
+
+int <lower=1> N_pss;
+array[N_pss] int <lower = 1> state_pss;
+vector[N_pss] y_pss;
+
+int <lower=1> N_ctq;
+int <lower=1> N_subj;
+array[N_ctq] int <lower=1> subj_ctq;
+
+vector[N_ctq] y_ea;
+vector[N_ctq] y_pa;
+vector[N_ctq] y_sa;
+vector[N_ctq] y_en;
+vector[N_ctq] y_pn;
+
+
+}
+
+parameters{
+
+vector[N_state] z_raw;
+real <lower=0> lambda_0;
+real gamma_abuse;
+real gamma_neglect;
+real <lower=0> sigma_z;
+real <lower=0> sigma_pair;
+
+vector[N_pair] u_pair;
+
+real beta_scz;
+
+real a_hcc;
+real <lower=0> b_hcc;
+real <lower=0> sigma_hcc;
+
+real a_panss;
+real b_panss;
+real <lower=0> sigma_panss;
+
+real a_pss;
+real b_pss;
+real <lower=0> sigma_pss;
+
+real <lower=0> sigma_ea;
+real <lower=0> sigma_pa;
+real <lower=0> sigma_sa;
+real <lower=0> sigma_en;
+real <lower=0> sigma_pn;
+
+
+real alpha_ea;
+real alpha_pa;
+real alpha_sa;
+real alpha_en;
+real alpha_pn;
+
+matrix[2, N_subj] c_raw;
+vector <lower=0> [2] sigma_c;
+cholesky_factor_corr[2] L_c;
+
+}
+
+transformed parameters {
+
+// Covariance matrix for CTQ latent factor c1 (abuse) and c2 (neglect)
+matrix[2, N_subj] c;
+c = diag_pre_multiply(sigma_c, L_c) * c_raw;
+
+// latent subject-level factors c[1, ] and c[2, ]. Implicit Bayesian imputation. 
+vector[N_subj] lambda_subj;
+
+for (i in 1:N_subj) {
+  lambda_subj[i] = lambda_0 + exp(gamma_abuse * c[1, i] + gamma_neglect * c[2, i]);
+}
+
+// dynamic latent process 
+vector[N_state] z;
+for (k in 1:N_state) {
+    // first point in time aligned between patients and controls
+    if (is_first[k] == 1) {
+        z[k] = u_pair[pair_id[k]] + beta_scz * scz[k] + 1 * z_raw[k];
+    // Ornstein-Uhlenbeck process (exponential return with stochastic volatility)
+    } else {
+        real dt = time[k] - time[k-1];
+        real phi = exp(-lambda_subj[subj_id[k]] * dt);
+        real sigma_dt = sigma_z * sqrt(1 - square(phi));
+        z[k] = phi * z[k-1] + sigma_dt * z_raw[k];
+    }
+  } 
+
+
+}
+
+model{
+
+// priors
+lambda_0 ~ normal(0, 1);
+gamma_abuse ~ normal(0, 1);
+gamma_neglect ~ normal(0, 1);
+sigma_z ~ exponential(1);
+sigma_pair ~ exponential(1);
+sigma_hcc ~ exponential(1);
+beta_scz ~ normal(0, 1);
+a_hcc ~ normal(0, 0.5);
+b_hcc ~ normal(0, 1);
+a_panss ~ normal(0, 0.5);
+b_panss ~ normal(0, 1);
+a_pss ~ normal(0, 0.5);
+b_pss ~ normal(0, 1);
+z_raw ~ std_normal();
+
+u_pair ~ normal(0, sigma_pair);
+
+sigma_ea ~ exponential(1);
+sigma_pa ~ exponential(1);
+sigma_sa ~ exponential(1);
+sigma_en ~ exponential(1);
+sigma_pn ~ exponential(1);
+
+alpha_ea ~ normal(0, 1);
+alpha_pa ~ normal(0, 1);
+alpha_sa ~ normal(0, 1);
+alpha_en ~ normal(0, 1);
+alpha_pn ~ normal(0, 1);
+
+to_vector(c_raw) ~ std_normal();
+
+L_c ~ lkj_corr_cholesky(2);
+
+
+// hcc emissions
+for (m in 1:N_hcc) {
+    y_hcc[m] ~ student_t(6, a_hcc + b_hcc * z[state_hcc[m]], sigma_hcc);
+    }
+
+// panss emissions
+for (m in 1:N_panss) {
+    y_panss[m] ~ normal(a_panss + b_panss * z[state_panss[m]], sigma_panss);
+    }
+
+// pss emissions
+for (m in 1:N_pss) {
+    y_pss[m] ~ normal(a_pss + b_pss * z[state_pss[m]], sigma_pss);
+    }
+
+// CTQ emissions 
+y_ea ~ normal(alpha_ea + c[1, subj_ctq]', sigma_ea);
+y_sa ~ normal(alpha_sa + c[1, subj_ctq]', sigma_sa);
+y_pa ~ normal(alpha_pa + c[1, subj_ctq]', sigma_pa);
+y_en ~ normal(alpha_en + c[2, subj_ctq]', sigma_en);
+y_pn ~ normal(alpha_pn + c[2, subj_ctq]', sigma_pn);
+
+
+}
+
+generated quantities{
+
+
+matrix[2, 2] corr = multiply_lower_tri_self_transpose(L_c); // Correlation matrix
+matrix[2, 2] cov = quad_form_diag(corr, sigma_c); // (S * R * S) Covariance matrix
+
+}
+
+```
+
+
+```{r}
+#| include: false
+
+state_df <- df_hcc %>%
+  # filter(!is.na(date_total)) %>% 
+  # filter(group == "HC") %>%
+  # filter(kod %in% c("H-VX2J9", "H-L32SM", "H-MNQKU")) %>%
+  filter_out(kod == "H-H79F8") %>% 
+  group_by(kod) %>% 
+  arrange(date_total, .by_group = TRUE) %>% 
+  mutate(subj_id = cur_group_id(),
+         first = if_else(row_number() == 1, 1, 0)) %>% 
+  # select(kod:visit, panss, segment:date_total, subj_id, first, HCC0, visit_spec) %>% 
+  ungroup() %>% 
+  mutate(state_id = 1:n(),
+         scz = if_else(group == "SCZ", 1, 0))
+ 
+state_df_long <- state_df %>% 
+  pivot_longer(c(z_log_hcc, z_panss, z_pss))
+
+hcc_df <- state_df %>%
+  filter(!is.na(HCC)) %>% 
+  distinct(HCC, HCC0, state_id) %>% 
+  mutate(obs_id = 1:n()) %>%
+  mutate(log_hcc = log(HCC),
+         z_log_hcc = scale(log_hcc)[, 1],
+         avg = mean(log_hcc),
+         std = sd(log_hcc))
+
+panss_df <- state_df %>% 
+  filter(!is.na(panss)) %>% 
+  filter(segment == 1) %>%
+  distinct(panss, state_id) %>% 
+  mutate(obs_id = 1:n()) %>% 
+  mutate(z_panss = scale(panss)[, 1],
+         avg = mean(panss),
+         std = sd(panss))
+
+
+
+pss_df <- state_df %>% 
+  filter(!is.na(pss)) %>% 
+  filter(segment == 1) %>% 
+  distinct(pss, state_id) %>% 
+  mutate(obs_id = 1:n()) %>% 
+  mutate(z_pss = scale(pss)[, 1],
+         avg = mean(pss),
+         std = sd(pss))
+
+ctq_df <- state_df %>% 
+  filter(!is.na(ctq_1)) %>% 
+  filter(segment == 1) %>% 
+  distinct(pick(contains("ctq"), state_id, subj_id)) %>% 
+  mutate(obs_id = 1:n()) %>% 
+  mutate(across(ctq_1:ctq_5, ~scale(.)[, 1]))
+
+
+data = list(N_state = max(nrow(state_df)),
+            subj_id = state_df$subj_id,
+            N_pair = max(state_df$matched_pair),
+            pair_id = state_df$matched_pair,
+            time = state_df$date_total,
+            is_first = state_df$first,
+            scz = state_df$scz,
+            N_hcc = max(nrow(hcc_df)),
+            state_hcc = hcc_df$state_id,
+            y_hcc = hcc_df$z_log_hcc,
+            N_panss = max(nrow(panss_df)),
+            state_panss = panss_df$state_id,
+            y_panss = panss_df$z_panss,
+            N_pss = max(nrow(pss_df)),
+            state_pss = pss_df$state_id,
+            y_pss = pss_df$z_pss,
+            y_ea = ctq_df$ctq_1,
+            y_pa = ctq_df$ctq_2,
+            y_sa = ctq_df$ctq_3,
+            y_en = ctq_df$ctq_4,
+            y_pn = ctq_df$ctq_5,
+            N_ctq = max(nrow(ctq_df)),
+            state_ctq = ctq_df$state_id,
+            subj_ctq = ctq_df$subj_id,
+            N_subj = max(ctq_df$subj_id))
+
+```
+
+
+
+```{r}
+#| output: false
+
+library(arrow)
+
+post <- scz_model$sample(
+  data = data,
+  chains = 4,
+  iter_sampling = 1000,
+  parallel_chains = 4,
+  refresh = 0
+)
+
+pars <- post$draws(format = "df")
+
+
+# # write_feather(pars, "posterior_draws.feather")
+# # # 
+# pars <- read_feather("posterior_draws.feather") %>%
+#   as_draws_df() # Restores posterior package attributes (chains, iterations)
+
+pred_df <- pars %>% 
+  select(starts_with("z[")) %>% 
+  mutate(draw = 1:nrow(.)) %>% 
+  pivot_longer(-draw) %>% 
+  mutate(state_id = as.numeric(str_extract(name, "\\d+"))) %>% 
+  left_join(state_df, by = "state_id") %>% 
+  filter(group == "SCZ") %>% 
+  mutate(time_bin = round(date_total)) %>%
+  # filter(time_bin %in% c(-10)) %>%
+  arrange(draw, kod, state_id)
+
+pred_df_hc <- pars %>% 
+  select(starts_with("z[")) %>% 
+  mutate(draw = 1:nrow(.)) %>% 
+  pivot_longer(-draw) %>% 
+  mutate(state_id = as.numeric(str_extract(name, "\\d+"))) %>% 
+  left_join(state_df, by = "state_id") %>% 
+  mutate(time_bin = round(date_total)) %>%
+  # filter(time_bin %in% c(-10)) %>%
+  arrange(draw, kod, state_id)
+
+
+
+ctq_draws <- pars %>%
+  # Adjust the string regex if your variables are named c_raw or c
+  select(starts_with("c[")) %>% 
+  mutate(draw = 1:nrow(.)) %>%
+  pivot_longer(-draw, names_to = "c_name", values_to = "ctq_factor") %>%
+  # Parse out the factor dimension (1 = Abuse, 2 = Neglect) and the subject index
+  mutate(
+    dimension = as.numeric(str_match(c_name, "c\\[(\\d+),\\s*(\\d+)\\]")[, 2]),
+    subj_id   = as.numeric(str_match(c_name, "c\\[(\\d+),\\s*(\\d+)\\]")[, 3])
+  ) %>%
+  # Let's focus on c[1] (Abuse) for this stratification. Change to 2 for neglect.
+  # filter(dimension == 1) %>% 
+  select(draw, subj_id, ctq_factor) %>% 
+  # slice_sample(n = 20000)
+  identity()
+
+# --- Step 2: Merge everything into the primary dataframe ---
+pred_df_stratified <- pars %>% 
+  select(starts_with("z[")) %>% 
+  mutate(draw = 1:nrow(.)) %>%
+  filter(draw %in% ctq_draws$draw) %>% 
+  pivot_longer(starts_with("z["), names_to = "z_name", values_to = "z_value") %>% 
+  mutate(state_id = as.numeric(str_extract(z_name, "\\d+"))) %>% 
+  # Join state details to find out which subject (subj_id) each state belongs to
+  left_join(state_df, by = "state_id") %>% 
+  # Join the draw-specific latent CTQ score for that specific subject
+  left_join(ctq_draws, by = c("draw", "subj_id"))
+
+# --- Step 3: Define the cut categories ---
+pred_df_data <- pred_df_stratified %>% 
+  mutate(
+    time_bin = round(date_total),
+    # Bin the continuous posterior draws of CTQ into Low/Medium/High groups
+    ctq_tier = cut(
+      ctq_factor, 
+      breaks = c(-Inf, -0.75, 0.75, Inf), 
+      labels = c("Low Trauma", "Moderate Trauma", "High Trauma")
+    )
+  ) %>% 
+  filter(!is.na(ctq_tier)) %>% # Drop subjects without valid data/mappings if any
+  arrange(draw, kod, state_id)
+
+state_df_long <- state_df %>% 
+  pivot_longer(c(z_log_hcc, z_panss, z_pss))
+
+pred_diff <- pred_df_hc %>%
+  # filter(group == "SCZ")
+  # filter(draw %in% c(1, 2),
+  #        kod == c("H-2A3N2", "H-42MDQ")) %>%
+  # filter(visit == "V1") %>%
+  select(draw, value, time_bin, group) %>%
+  group_by(group, time_bin, draw) %>%
+  mutate(pid = 1:n()) %>%
+  ungroup() %>% 
+  pivot_wider(names_from = group, values_from = value) %>% 
+  mutate(diff = HC - SCZ) %>%
+  group_by(time_bin) %>% 
+  summarise(
+    mean = mean(diff, na.rm = TRUE),
+    lower = quantile(diff, 0.1, na.rm = TRUE),
+    upper = quantile(diff, 0.9, na.rm = TRUE),
+    sign = mean > 0,
+    p_above = mean(diff > 0, na.rm = TRUE)
+  ) %>%
+  mutate(
+    upper_pos = pmax(upper, 0),
+    lower_pos = pmax(lower, 0),
+    upper_neg = pmin(upper, 0),
+    lower_neg = pmin(lower, 0)
+  ) %>% 
+  ungroup() %>%
+  mutate(avg_p_above = mean(p_above, na.rm = TRUE))
+
+```
+
+#### Model diagnostics and checks
+
+The model was rigorously evaluated for convergence using four Markov chains with 4000 iterations each. The Rhat diagnostic was used to assess convergence, with a value below 1.01 suggesting adequate convergence. 
+The posterior predictive checks follow.  
+
+
+```{r}
+#| include: false
+
+library(tidyverse)
+library(tidybayes)
+library(posterior)
+
+
+# Number of posterior draws used for PPCs.
+# 500 is usually plenty for figures and keeps the objects manageable.
+n_ppc <- 150
+
+# Draws needed for all PPCs
+draws_all <- pars
+
+# Randomly retain posterior draws
+draw_ids <- sample(
+  unique(draws_all$.draw),
+  size = n_ppc)
+
+draws <- draws_all |>
+  filter(.draw %in% draw_ids)
+```
+
+```{r}
+#| include: false
+
+state_info <- tibble(
+  state = seq_len(data$N_state),
+  subj = data$subj_id,
+  pair = data$pair_id,
+  time = data$time,
+  first = data$is_first,
+  scz = data$scz
+)
+
+hcc_obs <- tibble(
+  obs = seq_len(data$N_hcc),
+  state = data$state_hcc,
+  y = data$y_hcc
+) |>
+  left_join(state_info, by = "state")
+
+panss_obs <- tibble(
+  obs = seq_len(data$N_panss),
+  state = data$state_panss,
+  y = data$y_panss
+) |>
+  left_join(state_info, by = "state")
+
+pss_obs <- tibble(
+  obs = seq_len(data$N_pss),
+  state = data$state_pss,
+  y = data$y_pss
+) |>
+  left_join(state_info, by = "state")
+
+ctq_obs <- tibble(
+  obs = seq_len(data$N_ctq),
+  subj = data$subj_ctq,
+  EA = data$y_ea,
+  PA = data$y_pa,
+  SA = data$y_sa,
+  EN = data$y_en,
+  PN = data$y_pn
+)
+
+z_draws <- draws |>
+  select(.draw, starts_with("z[")) |>
+  pivot_longer(
+    - .draw,
+    names_to = "state",
+    values_to = "z"
+  ) |>
+  mutate(
+    state = readr::parse_number(state)
+  ) |>
+  left_join(state_info, by = "state")
+
+c_draws <- draws |>
+  select(.draw, starts_with("c[")) |>
+  pivot_longer(
+    - .draw,
+    names_to = "parameter",
+    values_to = "c"
+  ) |>
+  extract(
+    parameter,
+    into = c("factor", "subj"),
+    regex = "c\\[(\\d+),(\\d+)\\]",
+    convert = TRUE
+  ) |>
+  mutate(
+    factor = case_when(
+      factor == 1 ~ "abuse",
+      factor == 2 ~ "neglect"
+    )
+  )
+
+lambda_draws <- draws |>
+  select(.draw, starts_with("lambda_subj[")) |>
+  pivot_longer(
+    - .draw,
+    names_to = "subj",
+    values_to = "lambda"
+  ) |>
+  mutate(
+    subj = readr::parse_number(subj)
+  )
+
+hcc_par <- draws |>
+  select(
+    .draw,
+    a_hcc,
+    b_hcc,
+    sigma_hcc
+  )
+
+hcc_rep <- z_draws |>
+  select(.draw, state, subj, pair, time, scz, z) |>
+  inner_join(
+    hcc_obs |>
+      select(obs, state),
+    by = "state"
+  ) |>
+  left_join(hcc_par, by = ".draw") |>
+  mutate(
+    y_rep = a_hcc +
+      b_hcc * z +
+      sigma_hcc * rt(n(), df = 6)
+  )
+
+panss_par <- draws |>
+  select(
+    .draw,
+    a_panss,
+    b_panss,
+    sigma_panss
+  )
+
+panss_rep <- z_draws |>
+  select(.draw, state, subj, pair, time, scz, z) |>
+  inner_join(
+    panss_obs |>
+      select(obs, state),
+    by = "state"
+  ) |>
+  left_join(panss_par, by = ".draw") |>
+  mutate(
+    y_rep = rnorm(
+      n(),
+      mean = a_panss + b_panss * z,
+      sd = sigma_panss
+    )
+  )
+
+pss_par <- draws |>
+  select(
+    .draw,
+    a_pss,
+    b_pss,
+    sigma_pss
+  )
+
+pss_rep <- z_draws |>
+  select(.draw, state, subj, pair, time, scz, z) |>
+  inner_join(
+    pss_obs |>
+      select(obs, state),
+    by = "state"
+  ) |>
+  left_join(pss_par, by = ".draw") |>
+  mutate(
+    y_rep = rnorm(
+      n(),
+      mean = a_pss + b_pss * z,
+      sd = sigma_pss
+    )
+  )
+
+ctq_par <- draws |>
+  select(
+    .draw,
+    alpha_ea, alpha_pa, alpha_sa,
+    alpha_en, alpha_pn,
+    sigma_ea, sigma_pa, sigma_sa,
+    sigma_en, sigma_pn
+  )
+
+ctq_latent <- c_draws |>
+  select(.draw, factor, subj, c) |>
+  pivot_wider(
+    names_from = factor,
+    values_from = c
+  )
+
+ctq_rep <- ctq_obs |>
+  select(obs, subj) |>
+  crossing(
+    tibble(.draw = draw_ids)
+  ) |>
+  left_join(ctq_latent, by = c(".draw", "subj")) |>
+  left_join(ctq_par, by = ".draw") |>
+  mutate(
+    EA_rep = rnorm(
+      n(), alpha_ea + abuse, sigma_ea
+    ),
+    PA_rep = rnorm(
+      n(), alpha_pa + abuse, sigma_pa
+    ),
+    SA_rep = rnorm(
+      n(), alpha_sa + abuse, sigma_sa
+    ),
+    EN_rep = rnorm(
+      n(), alpha_en + neglect, sigma_en
+    ),
+    PN_rep = rnorm(
+      n(), alpha_pn + neglect, sigma_pn
+    )
+  )
+
+
+```
+
+```{r}
+#| include: false
+
+plot_ppc_density <- function(rep_data, observed, variable_rep,
+                             variable_obs, xlab) {
+
+  obs <- observed |>
+    transmute(
+      value = .data[[variable_obs]]
+    )
+
+  rep <- rep_data |>
+    transmute(
+      .draw,
+      value = .data[[variable_rep]]
+    )
+
+  ggplot() +
+    geom_density(
+      data = rep,
+      aes(x = value, group = .draw),
+      alpha = 0.04
+    ) +
+    geom_density(
+      data = obs,
+      aes(x = value),
+      linewidth = 1,
+      color = "red"
+    ) +
+    labs(
+      x = xlab,
+      y = "Density"
+    ) 
+}
+```
+
+#### Posterior predictive checks
+
+##### Density
+
+```{r}
+#| label: fig-ppc1
+#| fig-cap: "Posterior predictive check of HCC. The red line shows the observed values."
+
+plot_ppc_density(
+  hcc_rep,
+  hcc_obs,
+  "y_rep",
+  "y",
+  "Standardized log HCC"
+)
+```
+
+```{r}
+#| label: fig-ppc2
+#| fig-cap: "Posterior predictive check of PANSS. The red line shows the observed values."
+
+plot_ppc_density(
+  panss_rep,
+  panss_obs,
+  "y_rep",
+  "y",
+  "Standardized PANSS"
+)
+```
+
+```{r}
+#| label: fig-ppc3
+#| fig-cap: "Posterior predictive check of PSS. The red line shows the observed values."
+
+plot_ppc_density(
+  pss_rep,
+  pss_obs,
+  "y_rep",
+  "y",
+  "Standardized PSS"
+)
+```
+
+```{r}
+ctq_rep_long <- ctq_rep |>
+  select(.draw, subj, ends_with("_rep")) |>
+  pivot_longer(
+    ends_with("_rep"),
+    names_to = "scale",
+    values_to = "y_rep"
+  ) |>
+  mutate(
+    scale = str_remove(scale, "_rep$")
+  )
+
+ctq_obs_long <- ctq_obs |>
+  pivot_longer(
+    c(EA, PA, SA, EN, PN),
+    names_to = "scale",
+    values_to = "y"
+  )
+```
+
+
+```{r}
+#| label: fig-ppc4
+#| fig-cap: "Posterior predictive check of the latent CTQ. The red line shows the observed values."
+
+ggplot(ctq_rep_long, aes(x = y_rep, group = .draw)) +
+  geom_density(alpha = 0.04) +
+  geom_density(
+    data = ctq_obs_long,
+    aes(x = y),
+    inherit.aes = FALSE,
+    linewidth = 1,
+    color = "red"
+  ) +
+  facet_wrap(~ scale, scales = "free") +
+  labs(
+    x = "CTQ score",
+    y = "Density"
+  ) 
+
+```
+
+##### Statistics
+
+```{r}
+ppc_statistics <- function(rep_data, observed) {
+
+  rep_stats <- rep_data |>
+    group_by(.draw) |>
+    summarise(
+      mean = mean(y_rep),
+      sd = sd(y_rep),
+      q05 = quantile(y_rep, .05),
+      median = median(y_rep),
+      q95 = quantile(y_rep, .95),
+      min = min(y_rep),
+      max = max(y_rep),
+      .groups = "drop"
+    )
+
+  obs_stats <- observed |>
+    summarise(
+      mean = mean(y),
+      sd = sd(y),
+      q05 = quantile(y, .05),
+      median = median(y),
+      q95 = quantile(y, .95),
+      min = min(y),
+      max = max(y)
+    ) |>
+    pivot_longer(
+      everything(),
+      names_to = "statistic",
+      values_to = "observed"
+    )
+
+  rep_stats |>
+    pivot_longer(
+      - .draw,
+      names_to = "statistic",
+      values_to = "replicated"
+    ) |>
+    left_join(obs_stats, by = "statistic")
+}
+
+```
+
+```{r}
+#| label: fig-ppc5
+#| fig-cap: "Posterior predictive check of selected statistics of HCC. The red line shows the observed values."
+
+hcc_stats <- ppc_statistics(hcc_rep, hcc_obs)
+
+ggplot(hcc_stats, aes(x = replicated)) +
+  geom_density() +
+  geom_vline(
+    aes(xintercept = observed),
+    linewidth = 1,
+    color = "red"
+  ) +
+  facet_wrap(~ statistic, scales = "free") +
+  labs(
+    x = NULL,
+    y = "Posterior predictive density"
+  )
+
+```
+
+
+```{r}
+#| label: fig-ppc6
+#| fig-cap: "Posterior predictive check of selected statistics of PANSS. The red line shows the observed values."
+
+panss_stats <- ppc_statistics(panss_rep, panss_obs)
+
+ggplot(panss_stats, aes(x = replicated)) +
+  geom_density() +
+  geom_vline(
+    aes(xintercept = observed),
+    linewidth = 1,
+        color = "red"
+  ) +
+  facet_wrap(~ statistic, scales = "free") +
+  labs(
+    x = NULL,
+    y = "Posterior predictive density"
+  )
+```
+
+
+```{r}
+#| label: fig-ppc7
+#| fig-cap: "Posterior predictive check of selected statistics of PSS. The red line shows the observed values."
+
+pss_stats <- ppc_statistics(pss_rep, pss_obs)
+
+ggplot(pss_stats, aes(x = replicated)) +
+  geom_density() +
+  geom_vline(
+    aes(xintercept = observed),
+    linewidth = 1,    
+    color = "red"
+  ) +
+  facet_wrap(~ statistic, scales = "free") +
+  labs(
+    x = NULL,
+    y = "Posterior predictive density"
+  )
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
