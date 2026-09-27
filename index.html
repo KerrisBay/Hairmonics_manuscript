@@ -181,9 +181,9 @@ window.Quarto = {
   <ul>
 <li><a href="#density" id="toc-density" class="nav-link" data-scroll-target="#density">Density</a></li>
   <li><a href="#statistics" id="toc-statistics" class="nav-link" data-scroll-target="#statistics">Statistics</a></li>
-  <li><a href="#latent-trauma-metric-stratification-of-ctq" id="toc-latent-trauma-metric-stratification-of-ctq" class="nav-link" data-scroll-target="#latent-trauma-metric-stratification-of-ctq">Latent trauma metric stratification of CTQ</a></li>
   </ul>
 </li>
+  <li><a href="#latent-trauma-metric-stratification-of-ctq" id="toc-latent-trauma-metric-stratification-of-ctq" class="nav-link" data-scroll-target="#latent-trauma-metric-stratification-of-ctq">Latent trauma metric stratification of CTQ</a></li>
   </ul><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -543,8 +543,8 @@ S_Figure&nbsp;7: Posterior predictive check of selected statistics of PSS. The r
 </div>
 </div>
 </div>
-</section><section id="latent-trauma-metric-stratification-of-ctq" class="level5"><h5 class="anchored" data-anchor-id="latent-trauma-metric-stratification-of-ctq">Latent trauma metric stratification of CTQ</h5>
-<p>CTQ subscales exhibit high mutual inter-correlation due to shared response variance. Modeling observed subscale scores as independent predictors introduces multicollinearity and leads to overestimating trauma burden when multiple subscales are elevated simultaneously (analogous to multiple motion sensors triggering from a single event). To resolve this, we employed a Bayesian implicit latent variable framework, modeling five observed CTQ subscale indicators (<span class="math inline">\(\mathbf{y}_{\text{EA}}, \mathbf{y}_{\text{PA}}, \mathbf{y}_{\text{SA}}, \mathbf{y}_{\text{EN}}, \mathbf{y}_{\text{PN}}\)</span>) as expressions of two orthogonal/correlated latent factors: Abuse (<span class="math inline">\(c_{1,i}\)</span>) and Neglect (<span class="math inline">\(c_{2,i}\)</span>).Latent factor scores (<span class="math inline">\(c_{1}, c_{2}\)</span>) represent standardized, continuous latent trait dimensions. Subjects were categorized into trauma severity tiers based on their posterior latent metric distributions:</p>
+</section></section><section id="latent-trauma-metric-stratification-of-ctq" class="level4"><h4 class="anchored" data-anchor-id="latent-trauma-metric-stratification-of-ctq">Latent trauma metric stratification of CTQ</h4>
+<p>CTQ subscales exhibit high mutual inter-correlation due to shared response variance. Modeling observed subscale scores as independent predictors introduces multicollinearity and leads to overestimating trauma burden when multiple subscales are elevated simultaneously (analogous to multiple motion sensors triggering from a single event). To resolve this, we employed a Bayesian implicit latent variable framework, modeling five observed CTQ subscale indicators (<span class="math inline">\(\mathbf{y}_{\text{EA}}, \mathbf{y}_{\text{PA}}, \mathbf{y}_{\text{SA}}, \mathbf{y}_{\text{EN}}, \mathbf{y}_{\text{PN}}\)</span>) as expressions of two orthogonal/correlated latent factors: Abuse (<span class="math inline">\(c_{1,i}\)</span>) and Neglect (<span class="math inline">\(c_{2,i}\)</span>). Latent factor scores (<span class="math inline">\(c_{1}, c_{2}\)</span>) represent standardized, continuous latent trait dimensions. Subjects were categorized into trauma severity tiers based on their posterior latent metric distributions:</p>
 <p>Low Trauma Burden: Latent factor score <span class="math inline">\(\le -0.75\)</span></p>
 <p>Medium Trauma Burden: <span class="math inline">\(-0.75 &lt; \text{Latent factor score} &lt; 0.75\)</span></p>
 <p>High Trauma Burden: Latent factor score <span class="math inline">\(\ge 0.75\)</span></p>
@@ -578,7 +578,7 @@ S_Figure&nbsp;9: Posterior trauma-tier posterior classification per subject - st
 
 <!-- -->
 
-</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
     const anchorJS = new window.AnchorJS();
@@ -1566,21 +1566,21 @@ S_Figure&nbsp;9: Posterior trauma-tier posterior classification per subject - st
 <span id="cb2-545"><a href="#cb2-545" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-546"><a href="#cb2-546" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
 <span id="cb2-547"><a href="#cb2-547" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-548"><a href="#cb2-548" aria-hidden="true" tabindex="-1"></a><span class="co"># post &lt;- scz_model$sample(</span></span>
-<span id="cb2-549"><a href="#cb2-549" aria-hidden="true" tabindex="-1"></a><span class="co">#   data = data,</span></span>
-<span id="cb2-550"><a href="#cb2-550" aria-hidden="true" tabindex="-1"></a><span class="co">#   chains = 4,</span></span>
-<span id="cb2-551"><a href="#cb2-551" aria-hidden="true" tabindex="-1"></a><span class="co">#   iter_sampling = 1000,</span></span>
-<span id="cb2-552"><a href="#cb2-552" aria-hidden="true" tabindex="-1"></a><span class="co">#   parallel_chains = 4,</span></span>
-<span id="cb2-553"><a href="#cb2-553" aria-hidden="true" tabindex="-1"></a><span class="co">#   refresh = 0</span></span>
-<span id="cb2-554"><a href="#cb2-554" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
-<span id="cb2-555"><a href="#cb2-555" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb2-556"><a href="#cb2-556" aria-hidden="true" tabindex="-1"></a><span class="co"># pars &lt;- post$draws(format = "df")</span></span>
+<span id="cb2-548"><a href="#cb2-548" aria-hidden="true" tabindex="-1"></a>post <span class="ot">&lt;-</span> scz_model<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb2-549"><a href="#cb2-549" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
+<span id="cb2-550"><a href="#cb2-550" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb2-551"><a href="#cb2-551" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
+<span id="cb2-552"><a href="#cb2-552" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
+<span id="cb2-553"><a href="#cb2-553" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span></span>
+<span id="cb2-554"><a href="#cb2-554" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-555"><a href="#cb2-555" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-556"><a href="#cb2-556" aria-hidden="true" tabindex="-1"></a>pars <span class="ot">&lt;-</span> post<span class="sc">$</span><span class="fu">draws</span>(<span class="at">format =</span> <span class="st">"df"</span>)</span>
 <span id="cb2-557"><a href="#cb2-557" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-558"><a href="#cb2-558" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-559"><a href="#cb2-559" aria-hidden="true" tabindex="-1"></a><span class="co"># # write_feather(pars, "posterior_draws.feather")</span></span>
 <span id="cb2-560"><a href="#cb2-560" aria-hidden="true" tabindex="-1"></a><span class="co"># # # </span></span>
-<span id="cb2-561"><a href="#cb2-561" aria-hidden="true" tabindex="-1"></a>pars <span class="ot">&lt;-</span> <span class="fu">read_feather</span>(<span class="st">"posterior_draws.feather"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb2-562"><a href="#cb2-562" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_draws_df</span>() <span class="co"># Restores posterior package attributes (chains, iterations)</span></span>
+<span id="cb2-561"><a href="#cb2-561" aria-hidden="true" tabindex="-1"></a><span class="co"># pars &lt;- read_feather("posterior_draws.feather") %&gt;%</span></span>
+<span id="cb2-562"><a href="#cb2-562" aria-hidden="true" tabindex="-1"></a><span class="co">#   as_draws_df() # Restores posterior package attributes (chains, iterations)</span></span>
 <span id="cb2-563"><a href="#cb2-563" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-564"><a href="#cb2-564" aria-hidden="true" tabindex="-1"></a>pred_df <span class="ot">&lt;-</span> pars <span class="sc">%&gt;%</span> </span>
 <span id="cb2-565"><a href="#cb2-565" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"z["</span>)) <span class="sc">%&gt;%</span> </span>
@@ -2140,10 +2140,10 @@ S_Figure&nbsp;9: Posterior trauma-tier posterior classification per subject - st
 <span id="cb2-1143"><a href="#cb2-1143" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-1144"><a href="#cb2-1144" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb2-1145"><a href="#cb2-1145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1146"><a href="#cb2-1146" aria-hidden="true" tabindex="-1"></a><span class="fu">##### Latent trauma metric stratification of CTQ </span></span>
+<span id="cb2-1146"><a href="#cb2-1146" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Latent trauma metric stratification of CTQ </span></span>
 <span id="cb2-1147"><a href="#cb2-1147" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-1148"><a href="#cb2-1148" aria-hidden="true" tabindex="-1"></a>CTQ subscales exhibit high mutual inter-correlation due to shared response variance. Modeling observed subscale scores as independent predictors introduces multicollinearity and leads to overestimating trauma burden when multiple subscales are elevated simultaneously (analogous to multiple motion sensors triggering from a single event). </span>
-<span id="cb2-1149"><a href="#cb2-1149" aria-hidden="true" tabindex="-1"></a>To resolve this, we employed a Bayesian implicit latent variable framework, modeling five observed CTQ subscale indicators ($\mathbf{y}_{\text{EA}}, \mathbf{y}_{\text{PA}}, \mathbf{y}_{\text{SA}}, \mathbf{y}_{\text{EN}}, \mathbf{y}_{\text{PN}}$) as expressions of two orthogonal/correlated latent factors: Abuse ($c_{1,i}$) and Neglect ($c_{2,i}$).Latent factor scores ($c_{1}, c_{2}$) represent standardized, continuous latent trait dimensions. Subjects were categorized into trauma severity tiers based on their posterior latent metric distributions:</span>
+<span id="cb2-1149"><a href="#cb2-1149" aria-hidden="true" tabindex="-1"></a>To resolve this, we employed a Bayesian implicit latent variable framework, modeling five observed CTQ subscale indicators ($\mathbf{y}_{\text{EA}}, \mathbf{y}_{\text{PA}}, \mathbf{y}_{\text{SA}}, \mathbf{y}_{\text{EN}}, \mathbf{y}_{\text{PN}}$) as expressions of two orthogonal/correlated latent factors: Abuse ($c_{1,i}$) and Neglect ($c_{2,i}$). Latent factor scores ($c_{1}, c_{2}$) represent standardized, continuous latent trait dimensions. Subjects were categorized into trauma severity tiers based on their posterior latent metric distributions:</span>
 <span id="cb2-1150"><a href="#cb2-1150" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-1151"><a href="#cb2-1151" aria-hidden="true" tabindex="-1"></a>Low Trauma Burden: Latent factor score $\le -0.75$</span>
 <span id="cb2-1152"><a href="#cb2-1152" aria-hidden="true" tabindex="-1"></a></span>
