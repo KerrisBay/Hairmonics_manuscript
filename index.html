@@ -181,6 +181,7 @@ window.Quarto = {
   <ul>
 <li><a href="#density" id="toc-density" class="nav-link" data-scroll-target="#density">Density</a></li>
   <li><a href="#statistics" id="toc-statistics" class="nav-link" data-scroll-target="#statistics">Statistics</a></li>
+  <li><a href="#latent-trauma-metric-stratification-of-ctq" id="toc-latent-trauma-metric-stratification-of-ctq" class="nav-link" data-scroll-target="#latent-trauma-metric-stratification-of-ctq">Latent trauma metric stratification of CTQ</a></li>
   </ul>
 </li>
   </ul><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
@@ -538,6 +539,37 @@ S_Figure&nbsp;6: Posterior predictive check of selected statistics of PANSS. The
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppc7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 S_Figure&nbsp;7: Posterior predictive check of selected statistics of PSS. The red line shows the observed values.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="latent-trauma-metric-stratification-of-ctq" class="level5"><h5 class="anchored" data-anchor-id="latent-trauma-metric-stratification-of-ctq">Latent trauma metric stratification of CTQ</h5>
+<p>CTQ subscales exhibit high mutual inter-correlation due to shared response variance. Modeling observed subscale scores as independent predictors introduces multicollinearity and leads to overestimating trauma burden when multiple subscales are elevated simultaneously (analogous to multiple motion sensors triggering from a single event). To resolve this, we employed a Bayesian implicit latent variable framework, modeling five observed CTQ subscale indicators (<span class="math inline">\(\mathbf{y}_{\text{EA}}, \mathbf{y}_{\text{PA}}, \mathbf{y}_{\text{SA}}, \mathbf{y}_{\text{EN}}, \mathbf{y}_{\text{PN}}\)</span>) as expressions of two orthogonal/correlated latent factors: Abuse (<span class="math inline">\(c_{1,i}\)</span>) and Neglect (<span class="math inline">\(c_{2,i}\)</span>).Latent factor scores (<span class="math inline">\(c_{1}, c_{2}\)</span>) represent standardized, continuous latent trait dimensions. Subjects were categorized into trauma severity tiers based on their posterior latent metric distributions:</p>
+<p>Low Trauma Burden: Latent factor score <span class="math inline">\(\le -0.75\)</span></p>
+<p>Medium Trauma Burden: <span class="math inline">\(-0.75 &lt; \text{Latent factor score} &lt; 0.75\)</span></p>
+<p>High Trauma Burden: Latent factor score <span class="math inline">\(\ge 0.75\)</span></p>
+<p>By evaluating the dynamic baseline rate parameter <span class="math inline">\(\lambda_{\text{subj}}\)</span> on these latent continuum vectors (<span class="math inline">\(\gamma_{\text{abuse}} \cdot c_{1,i} + \gamma_{\text{neglect}} \cdot c_{2,i}\)</span>), the model isolates the underlying dimensional impact of childhood trauma while fully accounting for measurement uncertainty.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ppc8" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppc8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-ppc8-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="S_Figure&nbsp;8: Latent abuse–neglect correlation. The red line shows the posterior median and the dashed lines display the 95% credibility interval."><img src="index_files/figure-html/fig-ppc8-1.png" class="img-fluid figure-img" width="1440"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppc8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+S_Figure&nbsp;8: Latent abuse–neglect correlation. The red line shows the posterior median and the dashed lines display the 95% credibility interval.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>Because <span class="math inline">\(c_{1,i}\)</span> and <span class="math inline">\(c_{2,i}\)</span> are full posterior draws (not point estimates), each subject gets a posterior distribution over tiers rather than a single label.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ppc9" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppc9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-ppc9-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="S_Figure&nbsp;9: Posterior trauma-tier posterior classification per subject - stacked posterior probability of low / medium / high, subjects ordered by mean latent severity."><img src="index_files/figure-html/fig-ppc9-1.png" class="img-fluid figure-img" width="1440"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppc9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+S_Figure&nbsp;9: Posterior trauma-tier posterior classification per subject - stacked posterior probability of low / medium / high, subjects ordered by mean latent severity.
 </figcaption></figure>
 </div>
 </div>
@@ -1534,21 +1566,21 @@ S_Figure&nbsp;7: Posterior predictive check of selected statistics of PSS. The r
 <span id="cb2-545"><a href="#cb2-545" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-546"><a href="#cb2-546" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
 <span id="cb2-547"><a href="#cb2-547" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-548"><a href="#cb2-548" aria-hidden="true" tabindex="-1"></a>post <span class="ot">&lt;-</span> scz_model<span class="sc">$</span><span class="fu">sample</span>(</span>
-<span id="cb2-549"><a href="#cb2-549" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data,</span>
-<span id="cb2-550"><a href="#cb2-550" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb2-551"><a href="#cb2-551" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
-<span id="cb2-552"><a href="#cb2-552" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
-<span id="cb2-553"><a href="#cb2-553" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span></span>
-<span id="cb2-554"><a href="#cb2-554" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-555"><a href="#cb2-555" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-556"><a href="#cb2-556" aria-hidden="true" tabindex="-1"></a>pars <span class="ot">&lt;-</span> post<span class="sc">$</span><span class="fu">draws</span>(<span class="at">format =</span> <span class="st">"df"</span>)</span>
+<span id="cb2-548"><a href="#cb2-548" aria-hidden="true" tabindex="-1"></a><span class="co"># post &lt;- scz_model$sample(</span></span>
+<span id="cb2-549"><a href="#cb2-549" aria-hidden="true" tabindex="-1"></a><span class="co">#   data = data,</span></span>
+<span id="cb2-550"><a href="#cb2-550" aria-hidden="true" tabindex="-1"></a><span class="co">#   chains = 4,</span></span>
+<span id="cb2-551"><a href="#cb2-551" aria-hidden="true" tabindex="-1"></a><span class="co">#   iter_sampling = 1000,</span></span>
+<span id="cb2-552"><a href="#cb2-552" aria-hidden="true" tabindex="-1"></a><span class="co">#   parallel_chains = 4,</span></span>
+<span id="cb2-553"><a href="#cb2-553" aria-hidden="true" tabindex="-1"></a><span class="co">#   refresh = 0</span></span>
+<span id="cb2-554"><a href="#cb2-554" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb2-555"><a href="#cb2-555" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb2-556"><a href="#cb2-556" aria-hidden="true" tabindex="-1"></a><span class="co"># pars &lt;- post$draws(format = "df")</span></span>
 <span id="cb2-557"><a href="#cb2-557" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-558"><a href="#cb2-558" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-559"><a href="#cb2-559" aria-hidden="true" tabindex="-1"></a><span class="co"># # write_feather(pars, "posterior_draws.feather")</span></span>
 <span id="cb2-560"><a href="#cb2-560" aria-hidden="true" tabindex="-1"></a><span class="co"># # # </span></span>
-<span id="cb2-561"><a href="#cb2-561" aria-hidden="true" tabindex="-1"></a><span class="co"># pars &lt;- read_feather("posterior_draws.feather") %&gt;%</span></span>
-<span id="cb2-562"><a href="#cb2-562" aria-hidden="true" tabindex="-1"></a><span class="co">#   as_draws_df() # Restores posterior package attributes (chains, iterations)</span></span>
+<span id="cb2-561"><a href="#cb2-561" aria-hidden="true" tabindex="-1"></a>pars <span class="ot">&lt;-</span> <span class="fu">read_feather</span>(<span class="st">"posterior_draws.feather"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-562"><a href="#cb2-562" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_draws_df</span>() <span class="co"># Restores posterior package attributes (chains, iterations)</span></span>
 <span id="cb2-563"><a href="#cb2-563" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-564"><a href="#cb2-564" aria-hidden="true" tabindex="-1"></a>pred_df <span class="ot">&lt;-</span> pars <span class="sc">%&gt;%</span> </span>
 <span id="cb2-565"><a href="#cb2-565" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"z["</span>)) <span class="sc">%&gt;%</span> </span>
@@ -2108,17 +2140,232 @@ S_Figure&nbsp;7: Posterior predictive check of selected statistics of PSS. The r
 <span id="cb2-1143"><a href="#cb2-1143" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-1144"><a href="#cb2-1144" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb2-1145"><a href="#cb2-1145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1146"><a href="#cb2-1146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1146"><a href="#cb2-1146" aria-hidden="true" tabindex="-1"></a><span class="fu">##### Latent trauma metric stratification of CTQ </span></span>
 <span id="cb2-1147"><a href="#cb2-1147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1148"><a href="#cb2-1148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1149"><a href="#cb2-1149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1148"><a href="#cb2-1148" aria-hidden="true" tabindex="-1"></a>CTQ subscales exhibit high mutual inter-correlation due to shared response variance. Modeling observed subscale scores as independent predictors introduces multicollinearity and leads to overestimating trauma burden when multiple subscales are elevated simultaneously (analogous to multiple motion sensors triggering from a single event). </span>
+<span id="cb2-1149"><a href="#cb2-1149" aria-hidden="true" tabindex="-1"></a>To resolve this, we employed a Bayesian implicit latent variable framework, modeling five observed CTQ subscale indicators ($\mathbf{y}_{\text{EA}}, \mathbf{y}_{\text{PA}}, \mathbf{y}_{\text{SA}}, \mathbf{y}_{\text{EN}}, \mathbf{y}_{\text{PN}}$) as expressions of two orthogonal/correlated latent factors: Abuse ($c_{1,i}$) and Neglect ($c_{2,i}$).Latent factor scores ($c_{1}, c_{2}$) represent standardized, continuous latent trait dimensions. Subjects were categorized into trauma severity tiers based on their posterior latent metric distributions:</span>
 <span id="cb2-1150"><a href="#cb2-1150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1151"><a href="#cb2-1151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1151"><a href="#cb2-1151" aria-hidden="true" tabindex="-1"></a>Low Trauma Burden: Latent factor score $\le -0.75$</span>
 <span id="cb2-1152"><a href="#cb2-1152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1153"><a href="#cb2-1153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1153"><a href="#cb2-1153" aria-hidden="true" tabindex="-1"></a>Medium Trauma Burden: $-0.75 &lt; \text{Latent factor score} &lt; 0.75$</span>
 <span id="cb2-1154"><a href="#cb2-1154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1155"><a href="#cb2-1155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1155"><a href="#cb2-1155" aria-hidden="true" tabindex="-1"></a>High Trauma Burden: Latent factor score $\ge 0.75$</span>
 <span id="cb2-1156"><a href="#cb2-1156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1157"><a href="#cb2-1157" aria-hidden="true" tabindex="-1"></a>By evaluating the dynamic baseline rate parameter $\lambda_{\text{subj}}$ on these latent continuum vectors ($\gamma_{\text{abuse}} \cdot c_{1,i} + \gamma_{\text{neglect}} \cdot c_{2,i}$), the model isolates the underlying dimensional impact of childhood trauma while fully accounting for measurement uncertainty.</span>
+<span id="cb2-1158"><a href="#cb2-1158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1161"><a href="#cb2-1161" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb2-1162"><a href="#cb2-1162" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb2-1163"><a href="#cb2-1163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1164"><a href="#cb2-1164" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb2-1165"><a href="#cb2-1165" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(moments)     <span class="co"># skewness()</span></span>
+<span id="cb2-1166"><a href="#cb2-1166" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb2-1167"><a href="#cb2-1167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1168"><a href="#cb2-1168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1169"><a href="#cb2-1169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1170"><a href="#cb2-1170" aria-hidden="true" tabindex="-1"></a>N_REP <span class="ot">&lt;-</span> <span class="dv">200</span>L                                   <span class="co"># draws used for PPC</span></span>
+<span id="cb2-1171"><a href="#cb2-1171" aria-hidden="true" tabindex="-1"></a>draw_idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(pars), <span class="fu">min</span>(N_REP, <span class="fu">nrow</span>(pars)))</span>
+<span id="cb2-1172"><a href="#cb2-1172" aria-hidden="true" tabindex="-1"></a>pars_sub <span class="ot">&lt;-</span> pars[draw_idx, ]</span>
+<span id="cb2-1173"><a href="#cb2-1173" aria-hidden="true" tabindex="-1"></a>n_draws  <span class="ot">&lt;-</span> <span class="fu">nrow</span>(pars_sub)</span>
+<span id="cb2-1174"><a href="#cb2-1174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1175"><a href="#cb2-1175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1176"><a href="#cb2-1176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1177"><a href="#cb2-1177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1178"><a href="#cb2-1178" aria-hidden="true" tabindex="-1"></a>get_par_vec <span class="ot">&lt;-</span> <span class="cf">function</span>(df, name, idx) {</span>
+<span id="cb2-1179"><a href="#cb2-1179" aria-hidden="true" tabindex="-1"></a>  cols <span class="ot">&lt;-</span> <span class="fu">paste0</span>(name, <span class="st">"["</span>, idx, <span class="st">"]"</span>)</span>
+<span id="cb2-1180"><a href="#cb2-1180" aria-hidden="true" tabindex="-1"></a>  miss <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(cols, <span class="fu">names</span>(df))</span>
+<span id="cb2-1181"><a href="#cb2-1181" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(miss) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb2-1182"><a href="#cb2-1182" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Missing columns in `pars` for '"</span>, name, <span class="st">"': "</span>,</span>
+<span id="cb2-1183"><a href="#cb2-1183" aria-hidden="true" tabindex="-1"></a>         <span class="fu">paste</span>(<span class="fu">head</span>(miss, <span class="dv">5</span>), <span class="at">collapse =</span> <span class="st">", "</span>),</span>
+<span id="cb2-1184"><a href="#cb2-1184" aria-hidden="true" tabindex="-1"></a>         <span class="cf">if</span> (<span class="fu">length</span>(miss) <span class="sc">&gt;</span> <span class="dv">5</span>) <span class="st">", ..."</span> <span class="cf">else</span> <span class="st">""</span>)</span>
+<span id="cb2-1185"><a href="#cb2-1185" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-1186"><a href="#cb2-1186" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(df[, cols, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb2-1187"><a href="#cb2-1187" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-1188"><a href="#cb2-1188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1189"><a href="#cb2-1189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1190"><a href="#cb2-1190" aria-hidden="true" tabindex="-1"></a>get_par_mat2 <span class="ot">&lt;-</span> <span class="cf">function</span>(df, name, dim1, idx) {</span>
+<span id="cb2-1191"><a href="#cb2-1191" aria-hidden="true" tabindex="-1"></a>  cols <span class="ot">&lt;-</span> <span class="fu">paste0</span>(name, <span class="st">"["</span>, dim1, <span class="st">","</span>, idx, <span class="st">"]"</span>)</span>
+<span id="cb2-1192"><a href="#cb2-1192" aria-hidden="true" tabindex="-1"></a>  miss <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(cols, <span class="fu">names</span>(df))</span>
+<span id="cb2-1193"><a href="#cb2-1193" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(miss) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb2-1194"><a href="#cb2-1194" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Missing columns in `pars` for '"</span>, name, <span class="st">"': "</span>,</span>
+<span id="cb2-1195"><a href="#cb2-1195" aria-hidden="true" tabindex="-1"></a>         <span class="fu">paste</span>(<span class="fu">head</span>(miss, <span class="dv">5</span>), <span class="at">collapse =</span> <span class="st">", "</span>),</span>
+<span id="cb2-1196"><a href="#cb2-1196" aria-hidden="true" tabindex="-1"></a>         <span class="cf">if</span> (<span class="fu">length</span>(miss) <span class="sc">&gt;</span> <span class="dv">5</span>) <span class="st">", ..."</span> <span class="cf">else</span> <span class="st">""</span>)</span>
+<span id="cb2-1197"><a href="#cb2-1197" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-1198"><a href="#cb2-1198" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(df[, cols, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb2-1199"><a href="#cb2-1199" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-1200"><a href="#cb2-1200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1201"><a href="#cb2-1201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1202"><a href="#cb2-1202" aria-hidden="true" tabindex="-1"></a>affine_mu <span class="ot">&lt;-</span> <span class="cf">function</span>(mat, intercept, <span class="at">slope =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb2-1203"><a href="#cb2-1203" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">sweep</span>(mat, <span class="dv">1</span>, <span class="cf">if</span> (<span class="fu">is.null</span>(slope)) <span class="dv">1</span> <span class="cf">else</span> slope, <span class="st">"*"</span>)</span>
+<span id="cb2-1204"><a href="#cb2-1204" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sweep</span>(out, <span class="dv">1</span>, intercept, <span class="st">"+"</span>)</span>
+<span id="cb2-1205"><a href="#cb2-1205" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-1206"><a href="#cb2-1206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1207"><a href="#cb2-1207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1208"><a href="#cb2-1208" aria-hidden="true" tabindex="-1"></a>rnorm_mat <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_mat, sigma_vec) {</span>
+<span id="cb2-1209"><a href="#cb2-1209" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">length</span>(mu_mat), <span class="at">mean =</span> <span class="fu">as.vector</span>(mu_mat),</span>
+<span id="cb2-1210"><a href="#cb2-1210" aria-hidden="true" tabindex="-1"></a>               <span class="at">sd =</span> <span class="fu">rep</span>(sigma_vec, <span class="fu">ncol</span>(mu_mat))),</span>
+<span id="cb2-1211"><a href="#cb2-1211" aria-hidden="true" tabindex="-1"></a>         <span class="at">nrow =</span> <span class="fu">nrow</span>(mu_mat))</span>
+<span id="cb2-1212"><a href="#cb2-1212" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-1213"><a href="#cb2-1213" aria-hidden="true" tabindex="-1"></a>rt_mat <span class="ot">&lt;-</span> <span class="cf">function</span>(mu_mat, sigma_vec, <span class="at">df =</span> <span class="dv">6</span>) {</span>
+<span id="cb2-1214"><a href="#cb2-1214" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="fu">rt</span>(<span class="fu">length</span>(mu_mat), df) <span class="sc">*</span> <span class="fu">rep</span>(sigma_vec, <span class="fu">ncol</span>(mu_mat)) <span class="sc">+</span></span>
+<span id="cb2-1215"><a href="#cb2-1215" aria-hidden="true" tabindex="-1"></a>           <span class="fu">as.vector</span>(mu_mat),</span>
+<span id="cb2-1216"><a href="#cb2-1216" aria-hidden="true" tabindex="-1"></a>         <span class="at">nrow =</span> <span class="fu">nrow</span>(mu_mat))</span>
+<span id="cb2-1217"><a href="#cb2-1217" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-1218"><a href="#cb2-1218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1219"><a href="#cb2-1219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1220"><a href="#cb2-1220" aria-hidden="true" tabindex="-1"></a>state_lookup <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb2-1221"><a href="#cb2-1221" aria-hidden="true" tabindex="-1"></a>  <span class="at">state    =</span> <span class="fu">seq_len</span>(data<span class="sc">$</span>N_state),</span>
+<span id="cb2-1222"><a href="#cb2-1222" aria-hidden="true" tabindex="-1"></a>  <span class="at">subj_id  =</span> data<span class="sc">$</span>subj_id,</span>
+<span id="cb2-1223"><a href="#cb2-1223" aria-hidden="true" tabindex="-1"></a>  <span class="at">pair_id  =</span> data<span class="sc">$</span>pair_id,</span>
+<span id="cb2-1224"><a href="#cb2-1224" aria-hidden="true" tabindex="-1"></a>  <span class="at">time     =</span> data<span class="sc">$</span>time,</span>
+<span id="cb2-1225"><a href="#cb2-1225" aria-hidden="true" tabindex="-1"></a>  <span class="at">is_first =</span> data<span class="sc">$</span>is_first,</span>
+<span id="cb2-1226"><a href="#cb2-1226" aria-hidden="true" tabindex="-1"></a>  <span class="at">scz      =</span> data<span class="sc">$</span>scz</span>
+<span id="cb2-1227"><a href="#cb2-1227" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-1228"><a href="#cb2-1228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1229"><a href="#cb2-1229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1230"><a href="#cb2-1230" aria-hidden="true" tabindex="-1"></a>ppc_density_plot <span class="ot">&lt;-</span> <span class="cf">function</span>(y, y_rep, title, <span class="at">n_show =</span> <span class="dv">50</span>) {</span>
+<span id="cb2-1231"><a href="#cb2-1231" aria-hidden="true" tabindex="-1"></a>  show_idx <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(y_rep), <span class="fu">min</span>(n_show, <span class="fu">nrow</span>(y_rep)))</span>
+<span id="cb2-1232"><a href="#cb2-1232" aria-hidden="true" tabindex="-1"></a>  bayesplot<span class="sc">::</span><span class="fu">ppc_dens_overlay</span>(<span class="at">y =</span> y, <span class="at">yrep =</span> y_rep[show_idx, , <span class="at">drop =</span> <span class="cn">FALSE</span>]) <span class="sc">+</span></span>
+<span id="cb2-1233"><a href="#cb2-1233" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(title)</span>
+<span id="cb2-1234"><a href="#cb2-1234" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-1235"><a href="#cb2-1235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1236"><a href="#cb2-1236" aria-hidden="true" tabindex="-1"></a>ppc_stat_check <span class="ot">&lt;-</span> <span class="cf">function</span>(y, y_rep, stat_fun, stat_name, title) {</span>
+<span id="cb2-1237"><a href="#cb2-1237" aria-hidden="true" tabindex="-1"></a>  obs_stat  <span class="ot">&lt;-</span> <span class="fu">stat_fun</span>(y)</span>
+<span id="cb2-1238"><a href="#cb2-1238" aria-hidden="true" tabindex="-1"></a>  rep_stats <span class="ot">&lt;-</span> <span class="fu">apply</span>(y_rep, <span class="dv">1</span>, stat_fun)</span>
+<span id="cb2-1239"><a href="#cb2-1239" aria-hidden="true" tabindex="-1"></a>  p_bayes   <span class="ot">&lt;-</span> <span class="fu">mean</span>(rep_stats <span class="sc">&gt;=</span> obs_stat)</span>
+<span id="cb2-1240"><a href="#cb2-1240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1241"><a href="#cb2-1241" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">rep_stat =</span> rep_stats) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1242"><a href="#cb2-1242" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(rep_stat)) <span class="sc">+</span></span>
+<span id="cb2-1243"><a href="#cb2-1243" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">40</span>, <span class="at">fill =</span> <span class="st">"grey70"</span>, <span class="at">colour =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb2-1244"><a href="#cb2-1244" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> obs_stat, <span class="at">colour =</span> <span class="st">"coral"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-1245"><a href="#cb2-1245" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(title, <span class="st">" — "</span>, stat_name),</span>
+<span id="cb2-1246"><a href="#cb2-1246" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">sprintf</span>(<span class="st">"Bayesian p = %.3f  (observed = %.3f)"</span>, p_bayes, obs_stat),</span>
+<span id="cb2-1247"><a href="#cb2-1247" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> stat_name, <span class="at">y =</span> <span class="st">"count"</span>)</span>
+<span id="cb2-1248"><a href="#cb2-1248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1249"><a href="#cb2-1249" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">plot =</span> p, <span class="at">obs_stat =</span> obs_stat, <span class="at">rep_stats =</span> rep_stats, <span class="at">p_bayes =</span> p_bayes)</span>
+<span id="cb2-1250"><a href="#cb2-1250" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-1251"><a href="#cb2-1251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1252"><a href="#cb2-1252" aria-hidden="true" tabindex="-1"></a>run_stat_suite <span class="ot">&lt;-</span> <span class="cf">function</span>(y, y_rep, title) {</span>
+<span id="cb2-1253"><a href="#cb2-1253" aria-hidden="true" tabindex="-1"></a>  stat_fns <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">mean =</span> mean, <span class="at">sd =</span> sd, <span class="at">skewness =</span> moments<span class="sc">::</span>skewness,</span>
+<span id="cb2-1254"><a href="#cb2-1254" aria-hidden="true" tabindex="-1"></a>                    <span class="at">min =</span> min, <span class="at">max =</span> max)</span>
+<span id="cb2-1255"><a href="#cb2-1255" aria-hidden="true" tabindex="-1"></a>  <span class="fu">imap</span>(stat_fns, <span class="sc">~</span> <span class="fu">ppc_stat_check</span>(y, y_rep, .x, .y, title))</span>
+<span id="cb2-1256"><a href="#cb2-1256" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-1257"><a href="#cb2-1257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1258"><a href="#cb2-1258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1259"><a href="#cb2-1259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1260"><a href="#cb2-1260" aria-hidden="true" tabindex="-1"></a>ctq_outcomes <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb2-1261"><a href="#cb2-1261" aria-hidden="true" tabindex="-1"></a>  <span class="at">ea =</span> <span class="fu">list</span>(<span class="at">y =</span> data<span class="sc">$</span>y_ea, <span class="at">alpha =</span> <span class="st">"alpha_ea"</span>, <span class="at">sigma =</span> <span class="st">"sigma_ea"</span>, <span class="at">dim =</span> <span class="dv">1</span>),</span>
+<span id="cb2-1262"><a href="#cb2-1262" aria-hidden="true" tabindex="-1"></a>  <span class="at">pa =</span> <span class="fu">list</span>(<span class="at">y =</span> data<span class="sc">$</span>y_pa, <span class="at">alpha =</span> <span class="st">"alpha_pa"</span>, <span class="at">sigma =</span> <span class="st">"sigma_pa"</span>, <span class="at">dim =</span> <span class="dv">1</span>),</span>
+<span id="cb2-1263"><a href="#cb2-1263" aria-hidden="true" tabindex="-1"></a>  <span class="at">sa =</span> <span class="fu">list</span>(<span class="at">y =</span> data<span class="sc">$</span>y_sa, <span class="at">alpha =</span> <span class="st">"alpha_sa"</span>, <span class="at">sigma =</span> <span class="st">"sigma_sa"</span>, <span class="at">dim =</span> <span class="dv">1</span>),</span>
+<span id="cb2-1264"><a href="#cb2-1264" aria-hidden="true" tabindex="-1"></a>  <span class="at">en =</span> <span class="fu">list</span>(<span class="at">y =</span> data<span class="sc">$</span>y_en, <span class="at">alpha =</span> <span class="st">"alpha_en"</span>, <span class="at">sigma =</span> <span class="st">"sigma_en"</span>, <span class="at">dim =</span> <span class="dv">2</span>),</span>
+<span id="cb2-1265"><a href="#cb2-1265" aria-hidden="true" tabindex="-1"></a>  <span class="at">pn =</span> <span class="fu">list</span>(<span class="at">y =</span> data<span class="sc">$</span>y_pn, <span class="at">alpha =</span> <span class="st">"alpha_pn"</span>, <span class="at">sigma =</span> <span class="st">"sigma_pn"</span>, <span class="at">dim =</span> <span class="dv">2</span>)</span>
+<span id="cb2-1266"><a href="#cb2-1266" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-1267"><a href="#cb2-1267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1268"><a href="#cb2-1268" aria-hidden="true" tabindex="-1"></a>ctq_yrep <span class="ot">&lt;-</span> <span class="fu">map</span>(ctq_outcomes, <span class="cf">function</span>(spec) {</span>
+<span id="cb2-1269"><a href="#cb2-1269" aria-hidden="true" tabindex="-1"></a>  c_dim <span class="ot">&lt;-</span> <span class="fu">get_par_mat2</span>(pars_sub, <span class="st">"c"</span>, spec<span class="sc">$</span>dim, data<span class="sc">$</span>subj_ctq)</span>
+<span id="cb2-1270"><a href="#cb2-1270" aria-hidden="true" tabindex="-1"></a>  mu    <span class="ot">&lt;-</span> <span class="fu">sweep</span>(c_dim, <span class="dv">1</span>, pars_sub[[spec<span class="sc">$</span>alpha]], <span class="st">"+"</span>)</span>
+<span id="cb2-1271"><a href="#cb2-1271" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rnorm_mat</span>(mu, pars_sub[[spec<span class="sc">$</span>sigma]])</span>
+<span id="cb2-1272"><a href="#cb2-1272" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-1273"><a href="#cb2-1273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1274"><a href="#cb2-1274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1275"><a href="#cb2-1275" aria-hidden="true" tabindex="-1"></a>subj_manifest_obs <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">subj =</span> data<span class="sc">$</span>subj_ctq, <span class="sc">!!!</span><span class="fu">map</span>(ctq_outcomes, <span class="st">"y"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1276"><a href="#cb2-1276" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(subj) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1277"><a href="#cb2-1277" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), mean), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1278"><a href="#cb2-1278" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>subj)</span>
+<span id="cb2-1279"><a href="#cb2-1279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1280"><a href="#cb2-1280" aria-hidden="true" tabindex="-1"></a>obs_cor_mat <span class="ot">&lt;-</span> <span class="fu">cor</span>(subj_manifest_obs)</span>
+<span id="cb2-1281"><a href="#cb2-1281" aria-hidden="true" tabindex="-1"></a>obs_offdiag <span class="ot">&lt;-</span> obs_cor_mat[<span class="fu">lower.tri</span>(obs_cor_mat)]</span>
+<span id="cb2-1282"><a href="#cb2-1282" aria-hidden="true" tabindex="-1"></a>pair_names  <span class="ot">&lt;-</span> <span class="fu">combn</span>(<span class="fu">names</span>(subj_manifest_obs), <span class="dv">2</span>, paste, <span class="at">collapse =</span> <span class="st">"-"</span>)</span>
+<span id="cb2-1283"><a href="#cb2-1283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1284"><a href="#cb2-1284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1285"><a href="#cb2-1285" aria-hidden="true" tabindex="-1"></a>rep_offdiag <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="fu">seq_len</span>(n_draws), <span class="cf">function</span>(d) {</span>
+<span id="cb2-1286"><a href="#cb2-1286" aria-hidden="true" tabindex="-1"></a>  subj_manifest_rep <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">subj =</span> data<span class="sc">$</span>subj_ctq,</span>
+<span id="cb2-1287"><a href="#cb2-1287" aria-hidden="true" tabindex="-1"></a>                               <span class="sc">!!!</span><span class="fu">map</span>(ctq_yrep, <span class="sc">~</span> .x[d, ])) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1288"><a href="#cb2-1288" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(subj) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1289"><a href="#cb2-1289" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), mean), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1290"><a href="#cb2-1290" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>subj)</span>
+<span id="cb2-1291"><a href="#cb2-1291" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">cor</span>(subj_manifest_rep)</span>
+<span id="cb2-1292"><a href="#cb2-1292" aria-hidden="true" tabindex="-1"></a>  m[<span class="fu">lower.tri</span>(m)]</span>
+<span id="cb2-1293"><a href="#cb2-1293" aria-hidden="true" tabindex="-1"></a>}) <span class="sc">%&gt;%</span> <span class="fu">reduce</span>(rbind)</span>
+<span id="cb2-1294"><a href="#cb2-1294" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(rep_offdiag) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-1295"><a href="#cb2-1295" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(rep_offdiag) <span class="ot">&lt;-</span> pair_names</span>
+<span id="cb2-1296"><a href="#cb2-1296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1297"><a href="#cb2-1297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1298"><a href="#cb2-1298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1299"><a href="#cb2-1299" aria-hidden="true" tabindex="-1"></a>  latent_r  <span class="ot">&lt;-</span> pars[[<span class="st">"corr[1,2]"</span>]]</span>
+<span id="cb2-1300"><a href="#cb2-1300" aria-hidden="true" tabindex="-1"></a>  latent_ci <span class="ot">&lt;-</span> <span class="fu">quantile</span>(latent_r, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">5</span>, .<span class="dv">975</span>))</span>
+<span id="cb2-1301"><a href="#cb2-1301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1302"><a href="#cb2-1302" aria-hidden="true" tabindex="-1"></a>  latent_corr_plot <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">r =</span> latent_r) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1303"><a href="#cb2-1303" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(r)) <span class="sc">+</span></span>
+<span id="cb2-1304"><a href="#cb2-1304" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>, <span class="at">fill =</span> <span class="st">"skyblue"</span>, <span class="at">colour =</span> <span class="st">"white"</span>, <span class="at">alpha =</span> .<span class="dv">85</span>) <span class="sc">+</span></span>
+<span id="cb2-1305"><a href="#cb2-1305" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> latent_ci[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)], <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey30"</span>) <span class="sc">+</span></span>
+<span id="cb2-1306"><a href="#cb2-1306" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> latent_ci[<span class="dv">2</span>], <span class="at">colour =</span> <span class="st">"coral"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-1307"><a href="#cb2-1307" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="fu">sprintf</span>(<span class="st">"posterior median = %.2f, 95%% CrI [%.2f, %.2f]"</span>,</span>
+<span id="cb2-1308"><a href="#cb2-1308" aria-hidden="true" tabindex="-1"></a>                             latent_ci[<span class="dv">2</span>], latent_ci[<span class="dv">1</span>], latent_ci[<span class="dv">3</span>]),</span>
+<span id="cb2-1309"><a href="#cb2-1309" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="st">"r (latent)"</span>, <span class="at">y =</span> <span class="st">"count"</span>)</span>
+<span id="cb2-1310"><a href="#cb2-1310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1311"><a href="#cb2-1311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1312"><a href="#cb2-1312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1313"><a href="#cb2-1313" aria-hidden="true" tabindex="-1"></a>TIER_CUTS <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.75</span>, <span class="fl">0.75</span>)</span>
+<span id="cb2-1314"><a href="#cb2-1314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1315"><a href="#cb2-1315" aria-hidden="true" tabindex="-1"></a>c1_draws <span class="ot">&lt;-</span> <span class="fu">get_par_mat2</span>(pars_sub, <span class="st">"c"</span>, <span class="dv">1</span>, <span class="fu">seq_len</span>(data<span class="sc">$</span>N_subj))   <span class="co"># abuse</span></span>
+<span id="cb2-1316"><a href="#cb2-1316" aria-hidden="true" tabindex="-1"></a>c2_draws <span class="ot">&lt;-</span> <span class="fu">get_par_mat2</span>(pars_sub, <span class="st">"c"</span>, <span class="dv">2</span>, <span class="fu">seq_len</span>(data<span class="sc">$</span>N_subj))   <span class="co"># neglect</span></span>
+<span id="cb2-1317"><a href="#cb2-1317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1318"><a href="#cb2-1318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1319"><a href="#cb2-1319" aria-hidden="true" tabindex="-1"></a>z_c1 <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">scale</span>(<span class="fu">t</span>(c1_draws)))</span>
+<span id="cb2-1320"><a href="#cb2-1320" aria-hidden="true" tabindex="-1"></a>z_c2 <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">scale</span>(<span class="fu">t</span>(c2_draws)))</span>
+<span id="cb2-1321"><a href="#cb2-1321" aria-hidden="true" tabindex="-1"></a>severity_draws <span class="ot">&lt;-</span> (z_c1 <span class="sc">+</span> z_c2) <span class="sc">/</span> <span class="dv">2</span>                                 <span class="co"># ndraws x N_subj</span></span>
+<span id="cb2-1322"><a href="#cb2-1322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1323"><a href="#cb2-1323" aria-hidden="true" tabindex="-1"></a>tier_of <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">as.character</span>(<span class="fu">cut</span>(x, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, TIER_CUTS, <span class="cn">Inf</span>),</span>
+<span id="cb2-1324"><a href="#cb2-1324" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"low"</span>, <span class="st">"medium"</span>, <span class="st">"high"</span>)))</span>
+<span id="cb2-1325"><a href="#cb2-1325" aria-hidden="true" tabindex="-1"></a>tier_draws <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">tier_of</span>(<span class="fu">as.vector</span>(severity_draws)),</span>
+<span id="cb2-1326"><a href="#cb2-1326" aria-hidden="true" tabindex="-1"></a>                      <span class="at">nrow =</span> <span class="fu">nrow</span>(severity_draws), <span class="at">ncol =</span> <span class="fu">ncol</span>(severity_draws))</span>
+<span id="cb2-1327"><a href="#cb2-1327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1328"><a href="#cb2-1328" aria-hidden="true" tabindex="-1"></a>subj_tier_probs <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="fu">seq_len</span>(data<span class="sc">$</span>N_subj), <span class="cf">function</span>(i) {</span>
+<span id="cb2-1329"><a href="#cb2-1329" aria-hidden="true" tabindex="-1"></a>  tab <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">factor</span>(tier_draws[, i], <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"low"</span>, <span class="st">"medium"</span>, <span class="st">"high"</span>)))</span>
+<span id="cb2-1330"><a href="#cb2-1330" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">subj =</span> i,</span>
+<span id="cb2-1331"><a href="#cb2-1331" aria-hidden="true" tabindex="-1"></a>         <span class="at">p_low =</span> <span class="fu">unname</span>(tab[<span class="st">"low"</span>] <span class="sc">/</span> n_draws),</span>
+<span id="cb2-1332"><a href="#cb2-1332" aria-hidden="true" tabindex="-1"></a>         <span class="at">p_medium =</span> <span class="fu">unname</span>(tab[<span class="st">"medium"</span>] <span class="sc">/</span> n_draws),</span>
+<span id="cb2-1333"><a href="#cb2-1333" aria-hidden="true" tabindex="-1"></a>         <span class="at">p_high =</span> <span class="fu">unname</span>(tab[<span class="st">"high"</span>] <span class="sc">/</span> n_draws),</span>
+<span id="cb2-1334"><a href="#cb2-1334" aria-hidden="true" tabindex="-1"></a>         <span class="at">mean_severity =</span> <span class="fu">mean</span>(severity_draws[, i]),</span>
+<span id="cb2-1335"><a href="#cb2-1335" aria-hidden="true" tabindex="-1"></a>         <span class="at">modal_tier =</span> <span class="fu">names</span>(<span class="fu">which.max</span>(tab)))</span>
+<span id="cb2-1336"><a href="#cb2-1336" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-1337"><a href="#cb2-1337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1338"><a href="#cb2-1338" aria-hidden="true" tabindex="-1"></a>tier_plot <span class="ot">&lt;-</span> subj_tier_probs <span class="sc">%&gt;%</span></span>
+<span id="cb2-1339"><a href="#cb2-1339" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mean_severity) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1340"><a href="#cb2-1340" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">subj_ord =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1341"><a href="#cb2-1341" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(p_low, p_medium, p_high), <span class="at">names_to =</span> <span class="st">"tier"</span>, <span class="at">values_to =</span> <span class="st">"p"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1342"><a href="#cb2-1342" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">tier =</span> <span class="fu">factor</span>(<span class="fu">sub</span>(<span class="st">"^p_"</span>, <span class="st">""</span>, tier), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"low"</span>, <span class="st">"medium"</span>, <span class="st">"high"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb2-1343"><a href="#cb2-1343" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(subj_ord, p, <span class="at">fill =</span> tier)) <span class="sc">+</span></span>
+<span id="cb2-1344"><a href="#cb2-1344" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-1345"><a href="#cb2-1345" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="at">low =</span> <span class="st">"#4575b4"</span>, <span class="at">medium =</span> <span class="st">"#fee090"</span>, <span class="at">high =</span> <span class="st">"#d73027"</span>)) <span class="sc">+</span></span>
+<span id="cb2-1346"><a href="#cb2-1346" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"subject (ordered by severity)"</span>, <span class="at">y =</span> <span class="st">"posterior probability"</span>, <span class="at">fill =</span> <span class="cn">NULL</span>) </span>
+<span id="cb2-1347"><a href="#cb2-1347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1348"><a href="#cb2-1348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1349"><a href="#cb2-1349" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-1350"><a href="#cb2-1350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1351"><a href="#cb2-1351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1354"><a href="#cb2-1354" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb2-1355"><a href="#cb2-1355" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-ppc8</span></span>
+<span id="cb2-1356"><a href="#cb2-1356" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Latent abuse–neglect correlation. The red line shows the posterior median and the dashed lines display the 95% credibility interval."</span></span>
+<span id="cb2-1357"><a href="#cb2-1357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1358"><a href="#cb2-1358" aria-hidden="true" tabindex="-1"></a>latent_corr_plot</span>
+<span id="cb2-1359"><a href="#cb2-1359" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-1360"><a href="#cb2-1360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1361"><a href="#cb2-1361" aria-hidden="true" tabindex="-1"></a>Because $c_{1,i}$ and $c_{2,i}$ are full posterior draws (not point estimates), each subject gets a posterior distribution over tiers rather than a single label. </span>
+<span id="cb2-1362"><a href="#cb2-1362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1365"><a href="#cb2-1365" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb2-1366"><a href="#cb2-1366" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-ppc9</span></span>
+<span id="cb2-1367"><a href="#cb2-1367" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Posterior trauma-tier posterior classification per subject - stacked posterior probability of low / medium / high, subjects ordered by mean latent severity."</span></span>
+<span id="cb2-1368"><a href="#cb2-1368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1369"><a href="#cb2-1369" aria-hidden="true" tabindex="-1"></a>tier_plot</span>
+<span id="cb2-1370"><a href="#cb2-1370" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-1371"><a href="#cb2-1371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1372"><a href="#cb2-1372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1373"><a href="#cb2-1373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1374"><a href="#cb2-1374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1375"><a href="#cb2-1375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1376"><a href="#cb2-1376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1377"><a href="#cb2-1377" aria-hidden="true" tabindex="-1"></a></span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
