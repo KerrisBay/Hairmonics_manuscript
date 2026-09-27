@@ -573,7 +573,13 @@ S_Figure&nbsp;9: Posterior trauma-tier posterior classification per subject - st
 </div>
 </div>
 </div>
-<p>Posterior means of the latent metrics related to the CTQ native scale could be displayed as well.</p>
+<p>Posterior means of the latent metrics related to the CTQ native scale could be displayed by the following procedure:</p>
+<ol type="1">
+<li>Taking a mean of the 3 abuse native subscales (EA, PA, SA).</li>
+<li>Taking a mean of the 2 neglect native subscales (EN, PN).</li>
+<li>Standardize each construct separately across subjects.</li>
+<li>Averaging the two z-scores.</li>
+</ol>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-ppc10" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -2378,21 +2384,27 @@ S_Figure&nbsp;10: Native CTQ vs.&nbsp;posterior-mean latent metrics.
 <span id="cb2-1375"><a href="#cb2-1375" aria-hidden="true" tabindex="-1"></a>tier_plot</span>
 <span id="cb2-1376"><a href="#cb2-1376" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb2-1377"><a href="#cb2-1377" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1378"><a href="#cb2-1378" aria-hidden="true" tabindex="-1"></a>Posterior means of the latent metrics related to the CTQ native scale could be displayed as well. </span>
+<span id="cb2-1378"><a href="#cb2-1378" aria-hidden="true" tabindex="-1"></a>Posterior means of the latent metrics related to the CTQ native scale could be displayed by the following procedure: </span>
 <span id="cb2-1379"><a href="#cb2-1379" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1382"><a href="#cb2-1382" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb2-1383"><a href="#cb2-1383" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-ppc10</span></span>
-<span id="cb2-1384"><a href="#cb2-1384" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Native CTQ vs. posterior-mean latent metrics."</span></span>
+<span id="cb2-1380"><a href="#cb2-1380" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Taking a mean of the 3 abuse native subscales (EA, PA, SA).</span>
+<span id="cb2-1381"><a href="#cb2-1381" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Taking a mean of the 2 neglect native subscales (EN, PN).</span>
+<span id="cb2-1382"><a href="#cb2-1382" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Standardize each construct separately across subjects.</span>
+<span id="cb2-1383"><a href="#cb2-1383" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Averaging the two z-scores.</span>
+<span id="cb2-1384"><a href="#cb2-1384" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-1385"><a href="#cb2-1385" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1386"><a href="#cb2-1386" aria-hidden="true" tabindex="-1"></a>bundle_scatter</span>
-<span id="cb2-1387"><a href="#cb2-1387" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-1388"><a href="#cb2-1388" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1389"><a href="#cb2-1389" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1390"><a href="#cb2-1390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1388"><a href="#cb2-1388" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb2-1389"><a href="#cb2-1389" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-ppc10</span></span>
+<span id="cb2-1390"><a href="#cb2-1390" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Native CTQ vs. posterior-mean latent metrics."</span></span>
 <span id="cb2-1391"><a href="#cb2-1391" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1392"><a href="#cb2-1392" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-1393"><a href="#cb2-1393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1392"><a href="#cb2-1392" aria-hidden="true" tabindex="-1"></a>bundle_scatter</span>
+<span id="cb2-1393"><a href="#cb2-1393" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb2-1394"><a href="#cb2-1394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1395"><a href="#cb2-1395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1396"><a href="#cb2-1396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1397"><a href="#cb2-1397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1398"><a href="#cb2-1398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1399"><a href="#cb2-1399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-1400"><a href="#cb2-1400" aria-hidden="true" tabindex="-1"></a></span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
